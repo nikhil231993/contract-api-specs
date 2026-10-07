@@ -1,0 +1,195 @@
+openapi: 3.0.3
+info:
+  title: Payments API
+  version: 2.0.0
+  description: |
+    Create, list, retrieve and cancel payments.
+    Changes from v1:
+      - POST /payments now requires an Idempotency-Key header (breaking).
+      - New GET /payments list endpoint with date filters.
+      - New DELETE /payments/{paymentId} to cancel a pending payment.
+      - Payment.status gains CANCELLED.
+servers:
+  - url: https://api.example-bank.com/payments/v2
+security:
+  - bearerAuth: []
+tags:
+  - name: Payments
+paths:
+  /payments:
+    get:
+      tags: [Payments]
+      operationId: listPayments
+      summary: List payments for an account
+      parameters:
+        - name: accountId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Payments found
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Payment'
+    post:
+      tags: [Payments]
+      operationId: createPayment
+      summary: Create a payment
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Payment accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Idempotency key reused with a different payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /payments/{paymentId}:
+    get:
+      tags: [Payments]
+      operationId: getPayment
+      summary: Get a payment by id
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '200':
+          description: Payment found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Payments]
+      operationId: cancelPayment
+      summary: Cancel a pending payment
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '204':
+          description: Payment cancelled
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Payment is not in a cancellable state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    PaymentId:
+      name: paymentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    PaymentRequest:
+      type: object
+      required: [fromAccountId, toAccountId, amount]
+      properties:
+        fromAccountId:
+          type: string
+        toAccountId:
+          type: string
+        amount:
+          type: number
+          minimum: 0.01
+        reference:
+          type: string
+          maxLength: 18
+        scheduledDate:
+          type: string
+          format: date
+    Payment:
+      type: object
+      required: [paymentId, status, amount, createdAt]
+      properties:
+        paymentId:
+          type: string
+          format: uuid
+        fromAccountId:
+          type: string
+        toAccountId:
+          type: string
+        amount:
+          type: number
+        reference:
+          type: string
+        scheduledDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED, CANCELLED]
+        createdAt:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

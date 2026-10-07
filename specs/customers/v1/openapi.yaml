@@ -1,0 +1,176 @@
+openapi: 3.0.3
+info:
+  title: Customers API
+  version: 1.0.0
+  description: Create, retrieve and update customer profiles.
+servers:
+  - url: https://api.example-bank.com/customers/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: Customers
+paths:
+  /customers:
+    post:
+      tags: [Customers]
+      operationId: createCustomer
+      summary: Create a customer profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreate'
+      responses:
+        '201':
+          description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: A customer with this email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /customers/{customerId}:
+    get:
+      tags: [Customers]
+      operationId: getCustomer
+      summary: Get a customer profile
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+      responses:
+        '200':
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Customers]
+      operationId: updateCustomer
+      summary: Partially update a customer profile
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdate'
+      responses:
+        '200':
+          description: Customer updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    CustomerId:
+      name: customerId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^CUS[0-9]{10}$'
+  responses:
+    BadRequest:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Address:
+      type: object
+      required: [line1, city, postcode, country]
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postcode:
+          type: string
+        country:
+          type: string
+          pattern: '^[A-Z]{2}$'
+    CustomerCreate:
+      type: object
+      required: [firstName, lastName, email, dateOfBirth]
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+        mobile:
+          type: string
+          pattern: '^\+[1-9][0-9]{7,14}$'
+        dateOfBirth:
+          type: string
+          format: date
+        address:
+          $ref: '#/components/schemas/Address'
+    CustomerUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        email:
+          type: string
+          format: email
+        mobile:
+          type: string
+          pattern: '^\+[1-9][0-9]{7,14}$'
+        address:
+          $ref: '#/components/schemas/Address'
+    Customer:
+      allOf:
+        - $ref: '#/components/schemas/CustomerCreate'
+        - type: object
+          required: [customerId, createdAt]
+          properties:
+            customerId:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+            kycStatus:
+              type: string
+              enum: [PENDING, VERIFIED, REJECTED]
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

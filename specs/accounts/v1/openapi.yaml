@@ -1,0 +1,123 @@
+openapi: 3.0.3
+info:
+  title: Accounts API
+  version: 1.0.0
+  description: Retrieve customer bank accounts and balances.
+servers:
+  - url: https://api.example-bank.com/accounts/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: Accounts
+paths:
+  /accounts:
+    get:
+      tags: [Accounts]
+      operationId: listAccounts
+      summary: List accounts for the authenticated customer
+      responses:
+        '200':
+          description: Accounts found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /accounts/{accountId}:
+    get:
+      tags: [Accounts]
+      operationId: getAccount
+      summary: Get a single account by id
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Account found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /accounts/{accountId}/balance:
+    get:
+      tags: [Accounts]
+      operationId: getAccountBalance
+      summary: Get the current balance of an account
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Balance found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^ACC[0-9]{8}$'
+      example: ACC12345678
+  responses:
+    Unauthorized:
+      description: Missing or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Account:
+      type: object
+      required: [accountId, accountType, status]
+      properties:
+        accountId:
+          type: string
+          example: ACC12345678
+        accountType:
+          type: string
+          enum: [SAVINGS, TRANSACTION, CREDIT]
+        nickname:
+          type: string
+        status:
+          type: string
+          enum: [OPEN, CLOSED, FROZEN]
+    Balance:
+      type: object
+      required: [accountId, balance]
+      properties:
+        accountId:
+          type: string
+        balance:
+          type: number
+          format: double
+          example: 1520.75
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
