@@ -1,0 +1,12 @@
+apiName: CMPayments
+title: Payments API
+version: 1.12.0
+specFile: CMPayments_v1.12.yaml
+basePath: /payments/v1
+status: DEPRECATED
+owner: payments-platform
+releasedOn: 2026-06-01
+previousVersion: "1.11"
+changes:
+  - POST /payments/{paymentId}/refunds 201 response returns a Location header (non-breaking).
+  - RefundRequest gains optional note (max 140 chars) (non-breaking).

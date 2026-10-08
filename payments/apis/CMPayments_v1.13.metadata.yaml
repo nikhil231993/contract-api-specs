@@ -1,0 +1,12 @@
+apiName: CMPayments
+title: Payments API
+version: 1.13.0
+specFile: CMPayments_v1.13.yaml
+basePath: /payments/v1
+status: DEPRECATED
+owner: payments-platform
+releasedOn: 2026-07-20
+previousVersion: "1.12"
+changes:
+  - RefundRequest.reason adds MERCHANT_ERROR (non-breaking for clients, new value in responses).
+  - GET /payments/{paymentId}/refunds adds optional status query filter.

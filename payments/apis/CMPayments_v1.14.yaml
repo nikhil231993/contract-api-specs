@@ -1,0 +1,332 @@
+openapi: 3.0.3
+info:
+  title: Payments API
+  version: 1.14.0
+  description: |
+    Create, list, retrieve, cancel and refund payments.
+    Changes from v1.13:
+      - RefundRequest.amount is only required for PARTIAL refunds; FULL refunds may omit it.
+      - POST /payments/{paymentId}/refunds returns 429 when the refund rate limit is exceeded.
+servers:
+  - url: https://api.example-bank.com/payments/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: Payments
+  - name: Refunds
+paths:
+  /payments:
+    get:
+      tags: [Payments]
+      operationId: listPayments
+      summary: List payments for an account (cursor paginated)
+      parameters:
+        - name: accountId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        '200':
+          description: Payments found
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Payment'
+                  nextCursor:
+                    type: string
+                    nullable: true
+    post:
+      tags: [Payments]
+      operationId: createPayment
+      summary: Create a payment
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Payment accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Idempotency key reused with a different payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /payments/{paymentId}:
+    get:
+      tags: [Payments]
+      operationId: getPayment
+      summary: Get a payment by id
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '200':
+          description: Payment found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Payments]
+      operationId: cancelPayment
+      summary: Cancel a pending payment
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '204':
+          description: Payment cancelled
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Payment is not in a cancellable state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /payments/{paymentId}/refunds:
+    get:
+      tags: [Refunds]
+      operationId: listRefunds
+      summary: List refunds of a payment
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, COMPLETED, FAILED]
+      responses:
+        '200':
+          description: Refunds found
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Refund'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Refunds]
+      operationId: refundPayment
+      summary: Refund a completed payment, fully or partially
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundRequest'
+      responses:
+        '201':
+          description: Refund accepted
+          headers:
+            Location:
+              description: URL of the created refund
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refund'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: A refund with the same Idempotency-Key and a different payload already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Refund rate limit exceeded; retry after the Retry-After header
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+        '422':
+          description: Refund amount exceeds refundable balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    PaymentId:
+      name: paymentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Money:
+      type: object
+      required: [value, currency]
+      properties:
+        value:
+          type: string
+          pattern: '^[0-9]+\.[0-9]{2}$'
+          example: '250.00'
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: AUD
+    Party:
+      type: object
+      required: [accountId]
+      properties:
+        accountId:
+          type: string
+        name:
+          type: string
+        bsb:
+          type: string
+          pattern: '^[0-9]{3}-[0-9]{3}$'
+    PaymentRequest:
+      type: object
+      required: [debtor, creditor, amount]
+      properties:
+        debtor:
+          $ref: '#/components/schemas/Party'
+        creditor:
+          $ref: '#/components/schemas/Party'
+        amount:
+          $ref: '#/components/schemas/Money'
+        reference:
+          type: string
+          maxLength: 18
+        scheduledDate:
+          type: string
+          format: date
+    Payment:
+      type: object
+      required: [paymentId, status, amount, createdAt]
+      properties:
+        paymentId:
+          type: string
+          format: uuid
+        debtor:
+          $ref: '#/components/schemas/Party'
+        creditor:
+          $ref: '#/components/schemas/Party'
+        amount:
+          $ref: '#/components/schemas/Money'
+        reference:
+          type: string
+        scheduledDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED, CANCELLED, REFUNDED, PARTIALLY_REFUNDED]
+        createdAt:
+          type: string
+          format: date-time
+    RefundRequest:
+      type: object
+      required: [refundType, reason]
+      properties:
+        refundType:
+          type: string
+          enum: [FULL, PARTIAL]
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Money'
+          description: Required when refundType is PARTIAL; ignored for FULL.
+        reason:
+          type: string
+          enum: [DUPLICATE, FRAUD, CUSTOMER_REQUEST, MERCHANT_ERROR, OTHER]
+        note:
+          type: string
+          maxLength: 140
+    Refund:
+      type: object
+      required: [refundId, paymentId, refundType, amount, status, createdAt]
+      properties:
+        refundType:
+          type: string
+          enum: [FULL, PARTIAL]
+        createdAt:
+          type: string
+          format: date-time
+        refundId:
+          type: string
+          format: uuid
+        paymentId:
+          type: string
+          format: uuid
+        amount:
+          $ref: '#/components/schemas/Money'
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED]
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        traceId:
+          type: string

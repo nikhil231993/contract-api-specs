@@ -3,9 +3,9 @@ title: Payments API
 version: 1.11.0
 specFile: CMPayments_v1.11.yaml
 basePath: /payments/v1
-status: ACTIVE
+status: DEPRECATED
 owner: payments-platform
-releasedOn: 2026-09-14
+releasedOn: 2026-04-14
 previousVersion: "1.10"
 changes:
   - New GET /payments/{paymentId}/refunds to list refunds of a payment.

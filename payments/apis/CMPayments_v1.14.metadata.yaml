@@ -1,0 +1,12 @@
+apiName: CMPayments
+title: Payments API
+version: 1.14.0
+specFile: CMPayments_v1.14.yaml
+basePath: /payments/v1
+status: ACTIVE
+owner: payments-platform
+releasedOn: 2026-09-14
+previousVersion: "1.13"
+changes:
+  - RefundRequest.amount is only required for PARTIAL refunds; FULL refunds may omit it.
+  - POST /payments/{paymentId}/refunds returns 429 when the refund rate limit is exceeded.
