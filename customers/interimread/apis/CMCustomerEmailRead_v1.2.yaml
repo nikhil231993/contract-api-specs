@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: Customer Email Read API
+  version: 1.2.0
+  description: |
+    Read the email addresses held for a customer.
+servers:
+  - url: https://api.example-bank.com/customers/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: CustomerEmails
+paths:
+  /customers/{customerId}/emails:
+    get:
+      tags: [CustomerEmails]
+      operationId: listCustomerEmails
+      summary: List the email addresses of a customer
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+      responses:
+        '200':
+          description: Emails found
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Email'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    CustomerId:
+      name: customerId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^CUS[0-9]{10}$'
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Email:
+      type: object
+      required: [emailId, address, type, primary]
+      properties:
+        emailId:
+          type: string
+          format: uuid
+        address:
+          type: string
+          format: email
+        type:
+          type: string
+          enum: [PERSONAL, WORK]
+        primary:
+          type: boolean
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

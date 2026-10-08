@@ -1,0 +1,115 @@
+openapi: 3.0.3
+info:
+  title: Customer Email Read API
+  version: 1.4.0
+  description: |
+    Read the email addresses held for a customer.
+    Changes from v1.3:
+      - Email gains verified and verifiedAt.
+      - GET /customers/{customerId}/emails adds primaryOnly query filter.
+servers:
+  - url: https://api.example-bank.com/customers/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: CustomerEmails
+paths:
+  /customers/{customerId}/emails:
+    get:
+      tags: [CustomerEmails]
+      operationId: listCustomerEmails
+      summary: List the email addresses of a customer
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+        - name: primaryOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Emails found
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Email'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /customers/{customerId}/emails/{emailId}:
+    get:
+      tags: [CustomerEmails]
+      operationId: getCustomerEmail
+      summary: Get one email address of a customer
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+        - name: emailId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Email found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Email'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    CustomerId:
+      name: customerId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^CUS[0-9]{10}$'
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Email:
+      type: object
+      required: [emailId, address, type, primary]
+      properties:
+        emailId:
+          type: string
+          format: uuid
+        address:
+          type: string
+          format: email
+        type:
+          type: string
+          enum: [PERSONAL, WORK]
+        primary:
+          type: boolean
+        verified:
+          type: boolean
+        verifiedAt:
+          type: string
+          format: date-time
+          nullable: true
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

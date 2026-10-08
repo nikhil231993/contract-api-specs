@@ -1,0 +1,12 @@
+apiName: CMCustomerEmailRead
+title: Customer Email Read API
+version: 1.4.0
+specFile: CMCustomerEmailRead_v1.4.yaml
+basePath: /customers/v1
+status: ACTIVE
+owner: customer-platform
+releasedOn: 2026-08-25
+previousVersion: "1.3"
+changes:
+  - Email gains verified and verifiedAt.
+  - GET /customers/{customerId}/emails adds primaryOnly query filter.

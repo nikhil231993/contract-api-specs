@@ -1,0 +1,9 @@
+apiName: CMCustomerEmailRead
+title: Customer Email Read API
+version: 1.2.0
+specFile: CMCustomerEmailRead_v1.2.yaml
+basePath: /customers/v1
+status: DEPRECATED
+owner: customer-platform
+releasedOn: 2025-08-11
+changes: []
