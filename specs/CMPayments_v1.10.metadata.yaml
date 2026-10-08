@@ -1,0 +1,13 @@
+apiName: CMPayments
+title: Payments API
+version: 1.10.0
+specFile: CMPayments_v1.10.yaml
+basePath: /payments/v1
+status: ACTIVE
+owner: payments-platform
+releasedOn: 2026-03-02
+previousVersion: "1.9"
+changes:
+  - amount is now a Money object { value, currency } instead of a number (breaking).
+  - fromAccountId/toAccountId replaced by debtor/creditor objects (breaking).
+  - New POST /payments/{paymentId}/refunds.

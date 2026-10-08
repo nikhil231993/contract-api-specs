@@ -1,0 +1,9 @@
+apiName: CMAccounts
+title: Accounts API
+version: 1.0.0
+specFile: CMAccounts_v1.0.yaml
+basePath: /accounts/v1
+status: DEPRECATED
+owner: accounts-platform
+releasedOn: 2025-02-10
+changes: []

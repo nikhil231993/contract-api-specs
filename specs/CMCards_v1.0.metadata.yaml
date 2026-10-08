@@ -1,0 +1,9 @@
+apiName: CMCards
+title: Cards API
+version: 1.0.0
+specFile: CMCards_v1.0.yaml
+basePath: /cards/v1
+status: DEPRECATED
+owner: cards-platform
+releasedOn: 2025-03-12
+changes: []

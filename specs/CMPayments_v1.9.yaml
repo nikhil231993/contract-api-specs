@@ -1,16 +1,16 @@
 openapi: 3.0.3
 info:
   title: Payments API
-  version: 2.0.0
+  version: 1.9.0
   description: |
     Create, list, retrieve and cancel payments.
-    Changes from v1:
+    Changes from v1.8:
       - POST /payments now requires an Idempotency-Key header (breaking).
       - New GET /payments list endpoint with date filters.
       - New DELETE /payments/{paymentId} to cancel a pending payment.
       - Payment.status gains CANCELLED.
 servers:
-  - url: https://api.example-bank.com/payments/v2
+  - url: https://api.example-bank.com/payments/v1
 security:
   - bearerAuth: []
 tags:

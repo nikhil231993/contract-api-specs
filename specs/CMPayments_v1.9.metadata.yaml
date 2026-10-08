@@ -1,0 +1,14 @@
+apiName: CMPayments
+title: Payments API
+version: 1.9.0
+specFile: CMPayments_v1.9.yaml
+basePath: /payments/v1
+status: DEPRECATED
+owner: payments-platform
+releasedOn: 2025-06-04
+previousVersion: "1.8"
+changes:
+  - POST /payments now requires an Idempotency-Key header (breaking).
+  - New GET /payments list endpoint with date filters.
+  - New DELETE /payments/{paymentId} to cancel a pending payment.
+  - Payment.status gains CANCELLED.

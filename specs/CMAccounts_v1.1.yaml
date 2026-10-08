@@ -1,16 +1,16 @@
 openapi: 3.0.3
 info:
   title: Accounts API
-  version: 2.0.0
+  version: 1.1.0
   description: |
     Retrieve and open customer bank accounts.
-    Breaking changes from v1:
+    Breaking changes from v1.0:
       - GET /accounts is now paginated and returns an AccountPage envelope.
       - Balance.balance (number) replaced by currentBalance/availableBalance Money objects.
-    New in v2:
+    New in v1.1:
       - POST /accounts to open an account.
 servers:
-  - url: https://api.example-bank.com/accounts/v2
+  - url: https://api.example-bank.com/accounts/v1
 security:
   - bearerAuth: []
 tags:

@@ -1,15 +1,15 @@
 openapi: 3.0.3
 info:
   title: Payments API
-  version: 3.0.0
+  version: 1.10.0
   description: |
     Create, list, retrieve, cancel and refund payments.
-    Changes from v2:
+    Changes from v1.9:
       - amount is now a Money object { value, currency } instead of a number (breaking).
       - fromAccountId/toAccountId replaced by debtor/creditor objects (breaking).
       - New POST /payments/{paymentId}/refunds.
 servers:
-  - url: https://api.example-bank.com/payments/v3
+  - url: https://api.example-bank.com/payments/v1
 security:
   - bearerAuth: []
 tags:

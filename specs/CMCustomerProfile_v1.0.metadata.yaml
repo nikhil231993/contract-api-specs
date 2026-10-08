@@ -1,0 +1,9 @@
+apiName: CMCustomerProfile
+title: Customers API
+version: 1.0.0
+specFile: CMCustomerProfile_v1.0.yaml
+basePath: /customers/v1
+status: ACTIVE
+owner: customer-platform
+releasedOn: 2025-04-01
+changes: []

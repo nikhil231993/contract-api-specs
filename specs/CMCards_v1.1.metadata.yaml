@@ -1,0 +1,13 @@
+apiName: CMCards
+title: Cards API
+version: 1.1.0
+specFile: CMCards_v1.1.yaml
+basePath: /cards/v1
+status: ACTIVE
+owner: cards-platform
+releasedOn: 2025-11-20
+previousVersion: "1.0"
+changes:
+  - POST /cards/{cardId}/block now requires a request body with a reason (breaking).
+  - New POST /cards/{cardId}/unblock.
+  - New PUT /cards/{cardId}/limits.

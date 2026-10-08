@@ -1,0 +1,13 @@
+apiName: CMAccounts
+title: Accounts API
+version: 1.1.0
+specFile: CMAccounts_v1.1.yaml
+basePath: /accounts/v1
+status: ACTIVE
+owner: accounts-platform
+releasedOn: 2025-09-15
+previousVersion: "1.0"
+changes:
+  - GET /accounts is now paginated and returns an AccountPage envelope.
+  - Balance.balance (number) replaced by currentBalance/availableBalance Money objects.
+  - POST /accounts to open an account.

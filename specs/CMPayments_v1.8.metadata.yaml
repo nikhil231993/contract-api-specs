@@ -1,0 +1,9 @@
+apiName: CMPayments
+title: Payments API
+version: 1.8.0
+specFile: CMPayments_v1.8.yaml
+basePath: /payments/v1
+status: DEPRECATED
+owner: payments-platform
+releasedOn: 2025-01-20
+changes: []

@@ -1,15 +1,15 @@
 openapi: 3.0.3
 info:
   title: Cards API
-  version: 2.0.0
+  version: 1.1.0
   description: |
     Retrieve, block, unblock and set limits on cards.
-    Changes from v1:
+    Changes from v1.0:
       - POST /cards/{cardId}/block now requires a request body with a reason (breaking).
       - New POST /cards/{cardId}/unblock.
       - New PUT /cards/{cardId}/limits.
 servers:
-  - url: https://api.example-bank.com/cards/v2
+  - url: https://api.example-bank.com/cards/v1
 security:
   - bearerAuth: []
 tags:
