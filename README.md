@@ -15,16 +15,28 @@ sub-domain, and one self-contained file per API version with a metadata file nex
 |--------------------------------|-------------------|-------------------|-----------------|-------|
 | `customers/accounts/apis/`     | CMAccounts        | v1.0, v1.1        | v1.1  | v1.1 paginates `GET /accounts`, adds `POST /accounts`, Money balances |
 | `customers/profile/apis/`      | CMCustomerProfile | v1.0              | v1.0  | create / get / PATCH (merge-patch) |
-| `payments/apis/`               | CMPayments        | v1.8, v1.9, v1.10 | v1.10 | v1.9 adds Idempotency-Key + cancel; v1.10 Money amounts + refunds |
+| `payments/apis/`               | CMPayments        | v1.8, v1.9, v1.10, v1.11 | v1.11 | v1.9 adds Idempotency-Key + cancel; v1.10 Money amounts + refunds; v1.11 changes refunds (see below) |
 | `cards/cardmanagement/apis/`   | CMCards           | v1.0, v1.1        | v1.1  | v1.1 block needs a reason; adds unblock and limits |
 
 Folder depth varies on purpose (`payments/apis/` vs `customers/accounts/apis/`), so nothing should
 assume a fixed number of levels.
 
+## Same endpoint in several versions
+
+`/payments/{paymentId}/refunds` exists in two versions, with a different contract in each:
+
+| | v1.10 (DEPRECATED) | v1.11 (ACTIVE) |
+|---|---|---|
+| Methods | POST | GET (new), POST |
+| POST body required | `amount`, `reason` | `refundType`, `amount`, `reason` |
+| POST responses | 201, 404, 422 | 201, 404, **409**, 422 |
+
+A contract test written from the wrong version will fail, so the version has to be chosen deliberately.
+
 ## Picking the latest version
 
 Compare versions **numerically**, not alphabetically. Sorted by name, `CMPayments_v1.10.yaml` comes
-before `CMPayments_v1.8.yaml`, but v1.10 is the newest. CMPayments is set up to catch this mistake.
+before `CMPayments_v1.8.yaml`, but v1.10 is newer than v1.8 (and v1.11 is the newest). CMPayments is set up to catch this mistake.
 The `status: ACTIVE` field in the metadata file also marks the current version.
 
 ## Metadata file

@@ -1,0 +1,13 @@
+apiName: CMPayments
+title: Payments API
+version: 1.11.0
+specFile: CMPayments_v1.11.yaml
+basePath: /payments/v1
+status: ACTIVE
+owner: payments-platform
+releasedOn: 2026-09-14
+previousVersion: "1.10"
+changes:
+  - New GET /payments/{paymentId}/refunds to list refunds of a payment.
+  - POST /payments/{paymentId}/refunds requires refundType FULL or PARTIAL (breaking).
+  - POST /payments/{paymentId}/refunds returns 409 for a duplicate refund request.
