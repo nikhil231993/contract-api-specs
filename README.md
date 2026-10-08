@@ -1,22 +1,25 @@
 # contract-api-specs
 
 Dummy OpenAPI 3.0 specs used to try out MCP-driven contract-test generation.
-The layout mirrors a flat "bundled specifications" repo: one self-contained file per API version,
-each with a metadata file next to it.
+The layout mirrors a "bundled specifications" repo: domain folders, an `apis/` folder per
+sub-domain, and one self-contained file per API version with a metadata file next to it.
 
 ## Layout
 
 ```
-specs/<ApiName>_v<major>.<minor>.yaml            the OpenAPI spec (all $refs internal)
-specs/<ApiName>_v<major>.<minor>.metadata.yaml   status, owner, release date, change list
+<domain>/[<sub-domain>/]apis/<ApiName>_v<major>.<minor>.yaml            the OpenAPI spec (all $refs internal)
+<domain>/[<sub-domain>/]apis/<ApiName>_v<major>.<minor>.metadata.yaml   status, owner, release date, change list
 ```
 
-| API               | Versions             | Latest (ACTIVE) | Notes |
-|-------------------|----------------------|-----------------|-------|
-| CMAccounts        | v1.0, v1.1           | v1.1            | v1.1 paginates `GET /accounts`, adds `POST /accounts`, Money balances |
-| CMPayments        | v1.8, v1.9, v1.10    | v1.10           | v1.9 adds Idempotency-Key + cancel; v1.10 Money amounts + refunds |
-| CMCustomerProfile | v1.0                 | v1.0            | create / get / PATCH (merge-patch) |
-| CMCards           | v1.0, v1.1           | v1.1            | v1.1 block needs a reason; adds unblock and limits |
+| Folder                         | API               | Versions          | Latest (ACTIVE) | Notes |
+|--------------------------------|-------------------|-------------------|-----------------|-------|
+| `customers/accounts/apis/`     | CMAccounts        | v1.0, v1.1        | v1.1  | v1.1 paginates `GET /accounts`, adds `POST /accounts`, Money balances |
+| `customers/profile/apis/`      | CMCustomerProfile | v1.0              | v1.0  | create / get / PATCH (merge-patch) |
+| `payments/apis/`               | CMPayments        | v1.8, v1.9, v1.10 | v1.10 | v1.9 adds Idempotency-Key + cancel; v1.10 Money amounts + refunds |
+| `cards/cardmanagement/apis/`   | CMCards           | v1.0, v1.1        | v1.1  | v1.1 block needs a reason; adds unblock and limits |
+
+Folder depth varies on purpose (`payments/apis/` vs `customers/accounts/apis/`), so nothing should
+assume a fixed number of levels.
 
 ## Picking the latest version
 
